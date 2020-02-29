@@ -12,13 +12,13 @@ branches:
 jobs:
   include:
     # Quickly run tests in dev mode.
-    - rust: stable
-      install:
-        - rustup component add rustfmt
-        - export RUSTFLAGS="-C debuginfo=0" RUST_TEST_THREADS=1 RUST_TEST_PATIENCE_MS=200
-      script:
-        - make check-fmt
-        - travis_wait 40 make test
+    # - rust: stable
+    #   install:
+    #     - rustup component add rustfmt
+    #     - export RUSTFLAGS="-C debuginfo=0" RUST_TEST_THREADS=1 RUST_TEST_PATIENCE_MS=200
+    #   script:
+    #     - make check-fmt
+    #     - travis_wait 40 make test
         # If you're debugging disk utilization/caching... This finds the largest files in `target`:
         #- du -sh target && find target -type f |xargs -n 1000 du -s |sort -rn |head |awk '{print $2}' |xargs du -sh
 
@@ -27,7 +27,8 @@ jobs:
     #
     # build.l5d.io/linkerd2-proxy/latest.txt is updated to reference the latest
     # uploaded binary.
-    - stage: publish
+    - &publish
+      stage: publish
       if: branch = master && type != pull_request
       rust: stable
       script:
@@ -35,19 +36,46 @@ jobs:
         - CARGO_RELEASE=1 travis_wait make package
       after_deploy:
         - make clean-package
-      deploy:
-        on:
-          repo: linkerd/linkerd2-proxy
-          branch: master
+      deploy: &deploy
         skip_cleanup: true
         local-dir: target/release/package
-        bucket: build.l5d.io
+        bucket: linkerd2-proxy-artifacts
         upload-dir: linkerd2-proxy
         acl: public-read
         provider: gcs
-        access_key_id: GOOGFSRIR3LDO4FFBFCAZOCN
+        access_key_id: GOOGGFL4ZDY6R2P6LSU5G3GP
         secret_access_key:
-          secure: bd5YkL1KY0xllwN/1S1gmrtBkJcPFFwVfP79q69ghHfLupSWUPCPs2fnNi7w+N1AqzWbyIKDZlakxNaq+/q/+jrZfpCHqrM/ufrJ9lwgKRdECbVLIChPb6/wBOrFMfBD3IaRlXAEea12VLJzQ4ZOvL4pM+isKAJFC4Zm1uVTOr4f3w08vixShutU61Lmg1fIPTnBMW9CGobQSQB63OW2lOtqtZ+rVseLGB2ZY4HnfCV++XbsYYVpfSMs/8I95yUnIW8rxag9tNlt5qdNjMYB1GjRqz4I/td6PL0H8bAmIgOkdv5261R10IXua0tVbcB3/w8dlKoDOMu0xAeBqar0/8qPGLKepW2BGEoVI9a5GsXuC0IRR89a+OHBU1HZeL7y8s9oNp1T0LUkpE7V46ryaGpsEDQhHd7W77+lZ9CDMJ0agQnKJ7dlX4hrLObJaZnneMPhu1YtEU4xV53RbynFPbPTCwXzAbK+vVTCo/YbmHHIvvPGdw7hrlHDgCai7cRrk+kNPpAb8xYBobDOtCjK14PvD/CQdAGoivjsBLqg2xmB2sD06HdmDWYOTsm+6H3D/EgPXbeFoB8xiYof43S2gz+R1MqioFKYR31YlcyMkopFe7mYpAeDDXoVal3zsYi9XdbP0J7jm6/UF0yQSsDWP7GWHoIE5jaRDSb66HQW7MY=
+          secure: XuGUpw3MvU6NJ18ZZPemk8cm6vbWVptNiJS0i/RlnAZchRuczsNwxg6PYj7+BdB/Gu8qtftkfXsldZqMwrp/qg+3gRsfJLg3WNQ0vXNcfd92uEqK/Lu/ycKSQWPoDf/t5JoYWHPzmrhJd7kgiML534TUUKp5OjaWyw9/VnTW6pnjPwQ7WSRfBoHftYSQCIB735BsQ9cIygpl5EBaP5MlyBspIzqcBD9uctzf9xdsBk+XTXojCq7/E9/y4JaNXMy0jbJYHzVySaobtskPbDlAF7LxGjKoyI6pW737lhGrvVwBs+DgsGKgpy73UMV7xZbsC3D7AoU7ngBa79oDTMlEimz7QsP4w6xbd+LDUTi+vim+KKT4CJJY5iNxFdcd70Vx26qBLAJOEz3SaC7V4V7//4OJKIVgvyXcyt6p4HoyRPOffdYDVvZZfeNInrAfQhxhlxNL54o+FBXmyoD+GbfTdzAsf18Gm+RefrrXC7pjsHDKhr0lEMWltkIh1FEUNEpkCGum5Rr76JyBzsUksW/1VddIPZJHibF861c8HPBKrjGUsUZLjes88H0iggf37FGKAsdBVQb9j/ay+lkd1QOXGrpsaWBpcSbSHyAXx3GMBdchr7fUedfkbDAtCTLfukXRDpXG1t7WcmVMZfahCV/fIZqcLIZrtS1zIzZDrF307Ns=
+
+    - <<: *publish
+      env:
+        - PACKAGE_ARCH=arm
+        - CARGO_TARGET_ARCH=armv7-unknown-linux-gnueabihf
+        - CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc
+        - STRIP=arm-linux-gnueabihf-strip
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install -y gcc-arm-linux-gnueabihf
+      install:
+        - rustup target add $CARGO_TARGET_ARCH
+      deploy:
+        <<: *deploy
+        local-dir: target/armv7-unknown-linux-gnueabihf/release/package
+
+    - <<: *publish
+      env:
+        - PACKAGE_ARCH=arm64
+        - CARGO_TARGET_ARCH=aarch64-unknown-linux-gnu
+        - CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+        - STRIP=aarch64-linux-gnu-strip
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install -y gcc-aarch64-linux-gnu
+      install:
+        - rustup target add $CARGO_TARGET_ARCH
+      deploy:
+        <<: *deploy
+        local-dir: target/aarch64-unknown-linux-gnu/release/package
 
 notifications:
   email:
