@@ -45,9 +45,29 @@ jobs:
         with:
           entrypoint: make
           args: package
-      - run: ls target/${{ matrix.target }}/release/package
+
       - name: checksec
         uses: ./.github/actions/package
         with:
           entrypoint: /linkerd/validate-checksec.sh
           args: /linkerd/expected-checksec.json "target/${{ matrix.target }}/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-${{ matrix.architecture }}-checksec.json"
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.architecture }}-artifacts
+          path: target/${{ matrix.target }}/release/package/
+
+  release:
+    needs: [package]
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: git co
+        uses: actions/checkout@v1
+
+      - name: download artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Display structure of downloaded files
+        run: ls -R
