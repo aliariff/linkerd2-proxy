@@ -58,8 +58,9 @@ ifdef CARGO_DEBUG
 	fi
 endif
 	./checksec.sh $(PKG_BASE)/bin/linkerd2-proxy >$(PKG_CHECKSEC)
+	file $(PKG_ROOT)
 	cd $(PKG_ROOT)
-	ls -R
+	pwd
 	tar -czvf $(PKG) $(PKG_NAME)
 	$(SHASUM) $(PKG) >$(PKG_NAME).txt
 	rm -rf $(PKG_BASE)
