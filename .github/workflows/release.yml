@@ -23,5 +23,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: refs/tags/release/${{ github.ref }}
+          name: ${{ steps.release-tag-meta.outputs.name }}
           files: target/x86_64-unknown-linux-gnu/release/package/*
