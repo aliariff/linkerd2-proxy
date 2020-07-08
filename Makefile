@@ -44,7 +44,8 @@ SHELLCHECK ?= shellcheck
 SHELLCHECK_CMD = $(SHELLCHECK) -x -P "$(CURDIR)/profiling"
 
 $(TARGET_BIN): fetch
-	$(CARGO_BUILD) -p linkerd2-proxy
+	echo "file" > $(TARGET_BIN)
+	# $(CARGO_BUILD) -p linkerd2-proxy
 
 $(PKG_ROOT)/$(PKG) $(PKG_CHECKSEC): $(TARGET_BIN)
 	mkdir -p $(PKG_BASE)/bin
