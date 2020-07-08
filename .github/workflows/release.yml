@@ -1,6 +1,7 @@
 name: release
 
 on:
+  pull_request: {}
   push:
     tags:
       - "release/*"
@@ -17,7 +18,7 @@ jobs:
         uses: ./.github/actions/release-tag-meta
         with:
           git-ref: ${{ github.ref }}
-      #- run: echo "${{ toJSON(steps.release-tag-meta) }}"
+      - run: echo "${{ toJSON(steps.release-tag-meta) }}"
 
       - name: package
         env:
