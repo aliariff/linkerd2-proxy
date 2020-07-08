@@ -43,23 +43,21 @@ endif
 SHELLCHECK ?= shellcheck
 SHELLCHECK_CMD = $(SHELLCHECK) -x -P "$(CURDIR)/profiling"
 
-$(TARGET_BIN):
-	mkdir -p $(TARGET)
-	echo "file" > $(TARGET_BIN)
-	# $(CARGO_BUILD) -p linkerd2-proxy
+$(TARGET_BIN): fetch
+	$(CARGO_BUILD) -p linkerd2-proxy
 
 $(PKG_ROOT)/$(PKG) $(PKG_CHECKSEC): $(TARGET_BIN)
 	mkdir -p $(PKG_BASE)/bin
 	cp LICENSE $(PKG_BASE)
 	cp $(TARGET_BIN) $(PKG_BASE)/bin/linkerd2-proxy
-	# $(STRIP) $(PKG_BASE)/bin/linkerd2-proxy
+	$(STRIP) $(PKG_BASE)/bin/linkerd2-proxy
 ifdef CARGO_DEBUG
 	if which objcopy >/dev/null ; then \
 		objcopy $(TARGET_BIN) $(PKG_BASE)/linkerd2-proxy.obj ; \
 		chmod 644 $(PKG_BASE)/linkerd2-proxy.obj ; \
 	fi
 endif
-	# ./checksec.sh $(PKG_BASE)/bin/linkerd2-proxy >$(PKG_CHECKSEC)
+	./checksec.sh $(PKG_BASE)/bin/linkerd2-proxy >$(PKG_CHECKSEC) || true
 	cd $(PKG_ROOT) && \
 		tar -czvf $(PKG) $(PKG_NAME) && \
 		($(SHASUM) $(PKG) >$(PKG_NAME).txt)
