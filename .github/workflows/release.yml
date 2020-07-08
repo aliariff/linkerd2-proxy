@@ -20,25 +20,25 @@ jobs:
           git-ref: ${{ github.ref }}
       - run: echo "${{ toJSON(steps.release-tag-meta) }}"
 
-      - name: package
-        env:
-          CARGO_RELEASE: "1"
-          PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
-        uses: ./.github/actions/package
-        with:
-          entrypoint: make
-          args: package
+      # - name: package
+      #   env:
+      #     CARGO_RELEASE: "1"
+      #     PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
+      #   uses: ./.github/actions/package
+      #   with:
+      #     entrypoint: make
+      #     args: package
 
-      - name: checksec
-        uses: ./.github/actions/package
-        with:
-          entrypoint: /linkerd/validate-checksec.sh
-          args: /linkerd/expected-checksec.json "target/x86_64-unknown-linux-gnu/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-checksec.json"
+      # - name: checksec
+      #   uses: ./.github/actions/package
+      #   with:
+      #     entrypoint: /linkerd/validate-checksec.sh
+      #     args: /linkerd/expected-checksec.json "target/x86_64-unknown-linux-gnu/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-checksec.json"
 
       - name: release
         uses: softprops/action-gh-release@b21b43d
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: refs/tags/release/test-tag
+          name: refs/tags/release/${{ github.ref }}
           files:  target/x86_64-unknown-linux-gnu/release/package/*
