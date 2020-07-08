@@ -60,16 +60,11 @@ ifdef CARGO_DEBUG
 	fi
 endif
 	# ./checksec.sh $(PKG_BASE)/bin/linkerd2-proxy >$(PKG_CHECKSEC)
-	file $(PKG_ROOT)
-	cd $(PKG_ROOT)
-	echo $?
-	pwd
-	cd linkerd2-proxy
-	pwd
-	tar -czvf $(PKG) $(PKG_NAME)
-	$(SHASUM) $(PKG) >$(PKG_NAME).txt
-	rm -rf $(PKG_BASE)
-
+	cd $(PKG_ROOT) && \
+		tar -czvf $(PKG) $(PKG_NAME) && \
+		($(SHASUM) $(PKG) >$(PKG_NAME).txt) && \
+		rm -rf $(PKG_BASE)
+	ls -R $(PKG_ROOT)
 
 .PHONY: fetch
 fetch: Cargo.lock
