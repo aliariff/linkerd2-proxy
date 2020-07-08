@@ -38,8 +38,7 @@ jobs:
       - name: release
         uses: softprops/action-gh-release@b21b43d
         env:
-          INPUT_TAG_NAME: test-tag
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: ${{ steps.release-tag-meta.outputs.name }}
+          name: refs/tags/release/test-tag
           files:  target/x86_64-unknown-linux-gnu/release/package/*
