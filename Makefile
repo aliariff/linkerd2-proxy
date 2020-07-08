@@ -60,6 +60,9 @@ endif
 	./checksec.sh $(PKG_BASE)/bin/linkerd2-proxy >$(PKG_CHECKSEC)
 	file $(PKG_ROOT)
 	cd $(PKG_ROOT)
+	echo $?
+	pwd
+	cd linkerd2-proxy
 	pwd
 	tar -czvf $(PKG) $(PKG_NAME)
 	$(SHASUM) $(PKG) >$(PKG_NAME).txt
