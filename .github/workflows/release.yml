@@ -31,7 +31,7 @@ jobs:
         id: release-tag-meta
         uses: ./.github/actions/release-tag-meta
         with:
-          git-ref: ${{ github.ref }}
+          git-ref: ${GITHUB_SHA::7}
       #- run: echo "${{ toJSON(steps.release-tag-meta) }}"
 
       - name: package
