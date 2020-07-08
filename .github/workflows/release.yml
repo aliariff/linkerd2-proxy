@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  pull_request: {}
   push:
     tags:
       - "release/*"
@@ -31,7 +30,7 @@ jobs:
         id: release-tag-meta
         uses: ./.github/actions/release-tag-meta
         with:
-          git-ref: ${{ github.sha }}
+          git-ref: ${{ github.ref }}
       #- run: echo "${{ toJSON(steps.release-tag-meta) }}"
 
       - name: package
@@ -45,12 +44,12 @@ jobs:
         with:
           entrypoint: make
           args: package
-      - run: ls -R target/${{ matrix.target }}/release/package/
-      # - name: checksec
-      #   uses: ./.github/actions/package
-      #   with:
-      #     entrypoint: /linkerd/validate-checksec.sh
-      #     args: /linkerd/expected-checksec.json "target/${{ matrix.target }}/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-${{ matrix.architecture }}-checksec.json"
+
+      - name: checksec
+        uses: ./.github/actions/package
+        with:
+          entrypoint: /linkerd/validate-checksec.sh
+          args: /linkerd/expected-checksec.json "target/${{ matrix.target }}/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-${{ matrix.architecture }}-checksec.json"
 
       - name: upload artifacts
         uses: actions/upload-artifact@v2
@@ -70,7 +69,7 @@ jobs:
         id: release-tag-meta
         uses: ./.github/actions/release-tag-meta
         with:
-          git-ref: ${{ github.sha }}
+          git-ref: ${{ github.ref }}
 
       - name: download artifacts
         uses: actions/download-artifact@v2
