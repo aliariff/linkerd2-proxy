@@ -11,6 +11,16 @@ jobs:
     strategy:
       matrix:
         architecture: [amd64, arm64, arm]
+        include:
+          - architecture: amd64
+            target: x86_64-unknown-linux-gnu
+            strip: strip
+          - architecture: arm64
+            target: aarch64-unknown-linux-gnu
+            strip: aarch64-linux-gnu-strip
+          - architecture: arm
+            target: armv7-unknown-linux-gnueabihf
+            strip: arm-linux-gnueabihf-strip
     name: Package (${{ matrix.architecture }})
     runs-on: ubuntu-latest
     steps:
@@ -24,59 +34,19 @@ jobs:
           git-ref: ${{ github.ref }}
       #- run: echo "${{ toJSON(steps.release-tag-meta) }}"
 
-      - name: package amd64
-        if: matrix.architecture == 'amd64'
+      - name: package
         env:
           CARGO_RELEASE: "1"
           PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
+          CARGO_TARGET: ${{ matrix.target }}
+          STRIP: ${{ matrix.strip }}
         uses: ./.github/actions/package
         with:
           entrypoint: make
           args: package
 
-      - name: package arm64
-        if: matrix.architecture == 'arm64'
-        env:
-          CARGO_RELEASE: "1"
-          PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
-          CARGO_TARGET: aarch64-unknown-linux-gnu
-          STRIP: aarch64-linux-gnu-strip
-        uses: ./.github/actions/package
-        with:
-          entrypoint: make
-          args: package
-
-      - name: package arm
-        if: matrix.architecture == 'arm'
-        env:
-          CARGO_RELEASE: "1"
-          PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
-          CARGO_TARGET: armv7-unknown-linux-gnueabihf
-          STRIP: arm-linux-gnueabihf-strip
-        uses: ./.github/actions/package
-        with:
-          entrypoint: make
-          args: package
-
-      - run: ls target
-
-      - name: checksec amd64
-        if: matrix.architecture == 'amd64'
+      - name: checksec
         uses: ./.github/actions/package
         with:
           entrypoint: /linkerd/validate-checksec.sh
-          args: /linkerd/expected-checksec.json "target/x86_64-unknown-linux-gnu/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-checksec.json"
-
-      - name: checksec arm64
-        if: matrix.architecture == 'arm64'
-        uses: ./.github/actions/package
-        with:
-          entrypoint: /linkerd/validate-checksec.sh
-          args: /linkerd/expected-checksec.json "target/aarch64-unknown-linux-gnu/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-checksec.json"
-
-      - name: checksec arm
-        if: matrix.architecture == 'arm'
-        uses: ./.github/actions/package
-        with:
-          entrypoint: /linkerd/validate-checksec.sh
-          args: /linkerd/expected-checksec.json "target/armv7-unknown-linux-gnueabihf/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-checksec.json"
+          args: /linkerd/expected-checksec.json "target/${{ matrix.target }}/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-checksec.json"
