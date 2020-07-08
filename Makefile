@@ -62,9 +62,9 @@ endif
 	# ./checksec.sh $(PKG_BASE)/bin/linkerd2-proxy >$(PKG_CHECKSEC)
 	cd $(PKG_ROOT) && \
 		tar -czvf $(PKG) $(PKG_NAME) && \
-		($(SHASUM) $(PKG) >$(PKG_NAME).txt) && \
-		rm -rf $(PKG_BASE)
-	ls -R $(PKG_ROOT)
+		($(SHASUM) $(PKG) >$(PKG_NAME).txt)
+	rm -rf $(PKG_BASE)
+
 
 .PHONY: fetch
 fetch: Cargo.lock
