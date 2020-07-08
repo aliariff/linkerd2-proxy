@@ -59,7 +59,7 @@ ifdef CARGO_DEBUG
 		chmod 644 $(PKG_BASE)/linkerd2-proxy.obj ; \
 	fi
 endif
-	./checksec.sh $(PKG_BASE)/bin/linkerd2-proxy >$(PKG_CHECKSEC)
+	# ./checksec.sh $(PKG_BASE)/bin/linkerd2-proxy >$(PKG_CHECKSEC)
 	file $(PKG_ROOT)
 	cd $(PKG_ROOT)
 	echo $?

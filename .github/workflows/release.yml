@@ -31,7 +31,7 @@ jobs:
         id: release-tag-meta
         uses: ./.github/actions/release-tag-meta
         with:
-          git-ref: ${{ github.ref }}
+          git-ref: ${{ github.sha }}
       #- run: echo "${{ toJSON(steps.release-tag-meta) }}"
 
       - name: package
@@ -70,7 +70,7 @@ jobs:
         id: release-tag-meta
         uses: ./.github/actions/release-tag-meta
         with:
-          git-ref: ${{ github.ref }}
+          git-ref: ${{ github.sha }}
 
       - name: download artifacts
         uses: actions/download-artifact@v2
