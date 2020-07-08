@@ -46,11 +46,11 @@ jobs:
           entrypoint: make
           args: package
       - run: ls -R target/${{ matrix.target }}/release/package/
-      - name: checksec
-        uses: ./.github/actions/package
-        with:
-          entrypoint: /linkerd/validate-checksec.sh
-          args: /linkerd/expected-checksec.json "target/${{ matrix.target }}/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-${{ matrix.architecture }}-checksec.json"
+      # - name: checksec
+      #   uses: ./.github/actions/package
+      #   with:
+      #     entrypoint: /linkerd/validate-checksec.sh
+      #     args: /linkerd/expected-checksec.json "target/${{ matrix.target }}/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-${{ matrix.architecture }}-checksec.json"
 
       - name: upload artifacts
         uses: actions/upload-artifact@v2
