@@ -1,4 +1,4 @@
-name: release
+name: Release
 
 on:
   pull_request: {}
@@ -11,6 +11,7 @@ jobs:
     strategy:
       matrix:
         architecture: [amd64, arm64, arm]
+    name: Package (${{ matrix.architecture }})
     runs-on: ubuntu-latest
     steps:
       - name: git co
@@ -23,7 +24,7 @@ jobs:
           git-ref: ${{ github.ref }}
       #- run: echo "${{ toJSON(steps.release-tag-meta) }}"
 
-      - name: package (${{ matrix.architecture }})
+      - name: package amd64
         if: matrix.architecture == 'amd64'
         env:
           CARGO_RELEASE: "1"
@@ -33,7 +34,7 @@ jobs:
           entrypoint: make
           args: package
 
-      - name: package (${{ matrix.architecture }})
+      - name: package arm64
         if: matrix.architecture == 'arm64'
         env:
           CARGO_RELEASE: "1"
@@ -45,7 +46,7 @@ jobs:
           entrypoint: make
           args: package
 
-      - name: package (${{ matrix.architecture }})
+      - name: package arm
         if: matrix.architecture == 'arm'
         env:
           CARGO_RELEASE: "1"
