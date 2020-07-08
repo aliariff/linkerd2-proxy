@@ -44,7 +44,7 @@ jobs:
         with:
           entrypoint: make
           args: package
-
+      - run: ls -R target/${{ matrix.target }}/release/package/
       - name: checksec
         uses: ./.github/actions/package
         with:
