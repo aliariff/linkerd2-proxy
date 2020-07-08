@@ -40,6 +40,7 @@ jobs:
           PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
           CARGO_TARGET: ${{ matrix.target }}
           STRIP: ${{ matrix.strip }}
+          ARCH: ${{ matrix.architecture }}
         uses: ./.github/actions/package
         with:
           entrypoint: make
@@ -49,4 +50,4 @@ jobs:
         uses: ./.github/actions/package
         with:
           entrypoint: /linkerd/validate-checksec.sh
-          args: /linkerd/expected-checksec.json "target/${{ matrix.target }}/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-checksec.json"
+          args: /linkerd/expected-checksec.json "target/${{ matrix.target }}/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-${{ matrix.architecture }}-checksec.json"
