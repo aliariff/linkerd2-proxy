@@ -1,12 +1,16 @@
 name: release
 
 on:
+  pull_request: {}
   push:
     tags:
       - "release/*"
 
 jobs:
   package:
+    strategy:
+      matrix:
+        architecture: [amd64, arm64, arm]
     runs-on: ubuntu-latest
     steps:
       - name: git co
@@ -17,11 +21,46 @@ jobs:
         uses: ./.github/actions/release-tag-meta
         with:
           git-ref: ${{ github.ref }}
+      #- run: echo "${{ toJSON(steps.release-tag-meta) }}"
 
-      - name: release
-        uses: softprops/action-gh-release@b21b43d
+      - name: package (${{ matrix.architecture }})
+        if: matrix.architecture == 'amd64'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_RELEASE: "1"
+          PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
+        uses: ./.github/actions/package
         with:
-          name: ${{ steps.release-tag-meta.outputs.name }}
-          files: target/x86_64-unknown-linux-gnu/release/package/*
+          entrypoint: make
+          args: package
+
+      - name: package (${{ matrix.architecture }})
+        if: matrix.architecture == 'arm64'
+        env:
+          CARGO_RELEASE: "1"
+          PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
+          CARGO_TARGET: aarch64-unknown-linux-gnu
+          STRIP: aarch64-linux-gnu-strip
+        uses: ./.github/actions/package
+        with:
+          entrypoint: make
+          args: package
+
+      - name: package (${{ matrix.architecture }})
+        if: matrix.architecture == 'arm'
+        env:
+          CARGO_RELEASE: "1"
+          PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
+          CARGO_TARGET: armv7-unknown-linux-gnueabihf
+          STRIP: arm-linux-gnueabihf-strip
+        uses: ./.github/actions/package
+        with:
+          entrypoint: make
+          args: package
+
+      - run: ls target
+
+      - name: checksec
+        uses: ./.github/actions/package
+        with:
+          entrypoint: /linkerd/validate-checksec.sh
+          args: /linkerd/expected-checksec.json "target/x86_64-unknown-linux-gnu/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-checksec.json"
