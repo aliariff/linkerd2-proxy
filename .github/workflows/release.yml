@@ -31,7 +31,7 @@ jobs:
         id: release-tag-meta
         uses: ./.github/actions/release-tag-meta
         with:
-          git-ref: ${{ github.sha }}
+          git-ref: ${{ github.ref }}
       #- run: echo "${{ toJSON(steps.release-tag-meta) }}"
 
       # - name: package
@@ -76,7 +76,7 @@ jobs:
         id: release-tag-meta
         uses: ./.github/actions/release-tag-meta
         with:
-          git-ref: ${{ github.sha }}
+          git-ref: ${{ github.ref }}
 
       - name: download artifacts
         uses: actions/download-artifact@v2
@@ -84,7 +84,7 @@ jobs:
           path: artifacts
 
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -R artifacts
 
       - name: release
         uses: softprops/action-gh-release@b21b43d
@@ -92,4 +92,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: ${{ steps.release-tag-meta.outputs.name }}
-          files: artifacts/**/*
+          files: artifacts/*/*
