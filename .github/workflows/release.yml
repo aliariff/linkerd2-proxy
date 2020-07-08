@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  pull_request: {}
   push:
     tags:
       - "release/*"
@@ -34,29 +33,23 @@ jobs:
           git-ref: ${{ github.ref }}
       #- run: echo "${{ toJSON(steps.release-tag-meta) }}"
 
-      # - name: package
-      #   env:
-      #     CARGO_RELEASE: "1"
-      #     PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
-      #     CARGO_TARGET: ${{ matrix.target }}
-      #     STRIP: ${{ matrix.strip }}
-      #     ARCH: ${{ matrix.architecture }}
-      #   uses: ./.github/actions/package
-      #   with:
-      #     entrypoint: make
-      #     args: package
+      - name: package
+        env:
+          CARGO_RELEASE: "1"
+          PACKAGE_VERSION: ${{ steps.release-tag-meta.outputs.name }}
+          CARGO_TARGET: ${{ matrix.target }}
+          STRIP: ${{ matrix.strip }}
+          ARCH: ${{ matrix.architecture }}
+        uses: ./.github/actions/package
+        with:
+          entrypoint: make
+          args: package
 
-      # - name: checksec
-      #   uses: ./.github/actions/package
-      #   with:
-      #     entrypoint: /linkerd/validate-checksec.sh
-      #     args: /linkerd/expected-checksec.json "target/${{ matrix.target }}/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-${{ matrix.architecture }}-checksec.json"
-
-      - name: touch files
-        run: |
-          mkdir -p target/${{ matrix.target }}/release/package/
-          cd target/${{ matrix.target }}/release/package/
-          echo "test" > ${{ matrix.architecture }}.txt
+      - name: checksec
+        uses: ./.github/actions/package
+        with:
+          entrypoint: /linkerd/validate-checksec.sh
+          args: /linkerd/expected-checksec.json "target/${{ matrix.target }}/release/package/linkerd2-proxy-${{ steps.release-tag-meta.outputs.name }}-${{ matrix.architecture }}-checksec.json"
 
       - name: upload artifacts
         uses: actions/upload-artifact@v2
@@ -83,7 +76,7 @@ jobs:
         with:
           path: artifacts
 
-      - name: Display structure of downloaded files
+      - name: display structure of downloaded files
         run: ls -R artifacts
 
       - name: release
