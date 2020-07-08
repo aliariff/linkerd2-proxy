@@ -43,7 +43,8 @@ endif
 SHELLCHECK ?= shellcheck
 SHELLCHECK_CMD = $(SHELLCHECK) -x -P "$(CURDIR)/profiling"
 
-$(TARGET_BIN): fetch
+$(TARGET_BIN):
+	mkdir -p $(TARGET)
 	echo "file" > $(TARGET_BIN)
 	# $(CARGO_BUILD) -p linkerd2-proxy
 
